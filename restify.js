@@ -42,7 +42,7 @@ function populate(req, res, next){
 }
 
 function injectionMiddleware(method, f){
-    let payload = { method, authResult: {} }
+    let payload = { method, authResult: {}, userId: 'miguel' }
     if(typeof f === 'function'){
         payload = {...payload, ...f(method)}
     }else{
@@ -58,7 +58,7 @@ function injectionMiddleware(method, f){
     }
 }
 
-function createApi({router, auth, path, injection, Model, querySchema}){
+function createApi({router, auth, path, injection, Model, querySchema, preWrite}){
     router.get(path, injectionMiddleware('get', injection), auth, query(querySchema), securize, async function(req, res, next){
         try{
             const {query, select, cursor} = req.querymen
@@ -86,6 +86,11 @@ function createApi({router, auth, path, injection, Model, querySchema}){
 
     router.post(path, injectionMiddleware('post', injection), auth, async function(req, res, next){
         try{
+            if(preWrite){
+                preWrite(req)
+            }
+            req.body.createdBy = req.restify.userId
+            req.body.createdAt = new Date()
             const m = new Model(req.body)
             await m.save()
             res.json({_id: m._id})
@@ -96,6 +101,11 @@ function createApi({router, auth, path, injection, Model, querySchema}){
 
     router.patch(path + '/:_id', injectionMiddleware('patch', injection), auth, async function(req, res, next){
         try{
+            if(preWrite){
+                preWrite(req)
+            }
+            req.body.updatedBy = req.restify.userId
+            req.body.updatedAt = new Date()
             await Model.updateOne({_id: req.params._id}, req.body)
             res.end()
         }catch(err){

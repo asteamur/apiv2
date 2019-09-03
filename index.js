@@ -28,6 +28,10 @@ createApi({
     auth,
     path: '/api/a',
     Model: A,
+    preWrite: (req) => {
+        req.body.c = 54321
+        req.body.author = req.restify.userId
+    },
     querySchema,
     injection: function(method){
         return {path: 'user:memorandum:' + method}

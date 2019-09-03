@@ -77,7 +77,7 @@ describe('suite patch', ()=>{
         const body = {a: 'insert coin', c: 1}
         ret = await axios.patch('http://localhost:3000/api/a/' + a._id, body)
         const a_ = await A.findById(a._id)
-        assert.deepEqual({a: a_.a, c: a_.c }, body) 
+        assert.deepEqual({a: a_.a, c: a_.c }, {a: 'insert coin', c: 54321}) 
     })
 })
 
@@ -86,6 +86,6 @@ describe('suite post', ()=>{
         const body = {a: 'game over', c: 1}
         ret = await axios.post('http://localhost:3000/api/a', body)
         const p = await A.findById(ret.data._id)
-        assert.deepEqual({a: p.a, c: p.c }, body) 
+        assert.deepEqual({a: p.a, c: p.c, author: p.author }, {a: 'game over', c: 54321, author: 'miguel'}) 
     })
 })
