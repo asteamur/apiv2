@@ -15,11 +15,11 @@ before(async ()=>{
     await b.save()
     a.b = b
     await a.save()
-    let c = new A({a: 'yahoo!', c: 1})
+    let c = new A({a: 'google!', c: 1})
     await c.save()
-    c = new A({a: 'yahoo!', c: 2})
+    c = new A({a: 'bingo!', c: 2})
     await c.save()
-    c = new A({a: 'yahoo!', c: 3})
+    c = new A({a: 'insert coin', c: 3})
     await c.save()
 })
 
@@ -29,8 +29,6 @@ after(async ()=>{
 
 describe('suite get', ()=>{
     it('test get a, field a', async ()=>{
-        //ret = await axios.get('http://localhost:3000/api/kitten/5d668358b808865b43e43c2f/?human=name&fields=name,human,human-2')
-        //ret = await axios.get('http://localhost:3000/api/kitten/5d668358b808865b43e43c2f/?fields=name,human,human-name')
         ret = await axios.get('http://localhost:3000/api/a/' + a._id + '/?fields=a')
         assert.deepEqual(ret.data, {
             _id: '' + a._id,
@@ -39,13 +37,14 @@ describe('suite get', ()=>{
     })
 
     it('test get a, field a, b populate b field b1', async ()=>{
-        ret = await axios.get('http://localhost:3000/api/a/' + a._id + '/?fields=a,b,b-b1')
+        ret = await axios.get('http://localhost:3000/api/a/' + a._id + '/?fields=a,b,b%2Eb1,b%2Eb2')
         assert.deepEqual(ret.data, {
             _id: '' + a._id,
             a: 'yahoo!',
             b: {
                 _id: '' + b._id,
-                b1: 'game over'
+                b1: 'game over',
+                b2: 3
             }
         })
     })
@@ -54,15 +53,39 @@ describe('suite get', ()=>{
         ret = await axios.get('http://localhost:3000/api/a/?fields=a,c')
         assert.deepEqual(ret.data.map((x) => {
             return {a: x.a, c: x.c}
-        }), [{a: 'yahoo!', c: 0}, {a: 'yahoo!', c: 1}, {a: 'yahoo!', c: 2}, {a: 'yahoo!', c: 3}])
+        }), [{a: 'yahoo!', c: 0}, {a: 'google!', c: 1}, {a: 'bingo!', c: 2}, {a: 'insert coin', c: 3}])
     })
 
+    it('test get several a, regex', async ()=>{
+        ret = await axios.get('http://localhost:3000/api/a/?a=oo&fields=a,c')
+        assert.deepEqual(ret.data.map((x) => {
+            return {a: x.a, c: x.c}
+        }), [{a: 'yahoo!', c: 0}, {a: 'google!', c: 1}])
+    })
 
     it('test get several a, field a, c, sort -c, page 1, limit 2', async ()=>{
         ret = await axios.get('http://localhost:3000/api/a/?page=1&limit=2&sort=-c&fields=a,c')
         assert.deepEqual(ret.data.map((x) => {
             return {a: x.a, c: x.c}
-        }), [{a: 'yahoo!', c: 3}, {a: 'yahoo!', c: 2}])
+        }), [{a: 'insert coin', c: 3}, {a: 'bingo!', c: 2}])
     })
 
+})
+
+describe('suite patch', ()=>{
+    it('test simple patch', async ()=>{
+        const body = {a: 'insert coin', c: 1}
+        ret = await axios.patch('http://localhost:3000/api/a/' + a._id, body)
+        const a_ = await A.findById(a._id)
+        assert.deepEqual({a: a_.a, c: a_.c }, body) 
+    })
+})
+
+describe('suite post', ()=>{
+    it('test simple post', async ()=>{
+        const body = {a: 'game over', c: 1}
+        ret = await axios.post('http://localhost:3000/api/a', body)
+        const p = await A.findById(ret.data._id)
+        assert.deepEqual({a: p.a, c: p.c }, body) 
+    })
 })

@@ -9,9 +9,11 @@ function populate(req, res, next){
     let path = null
     let field = null
     let splitted = []
+    const populateKeys = new Set()
     const select = Object.keys(req.querymen.select).reduce((obj, v)=>{ 
         splitted = v.match(/(.+)\.(.+)/)
         if(splitted === null) return obj
+        populateKeys.add(v)
         //splitted = v.split('.')
         path = splitted[1]
         field = splitted[2]
@@ -19,8 +21,13 @@ function populate(req, res, next){
             req.querymen.select[v] === 1){
             obj[path] = {...obj[path], [field]: 1}
         }
+        //delete req.querymen.select[v]
         return obj
     }, {})
+
+    for(let key of populateKeys){
+        delete req.querymen.select[key]
+    }
 
     let aux = null
     const result = Object.keys(select).reduce((arr, v)=>{
@@ -43,7 +50,7 @@ function injectionMiddleware(method, f){
     }
     return function(req, res, next){
         try{
-            req.restify = {method, payload}
+            req.restify = payload
             next()
         }catch(err){
             next(err)
@@ -67,7 +74,7 @@ function createApi({router, auth, path, injection, Model, querySchema}){
         try{
             const {select} = req.querymen
             let ret = await Model.findById(req.params._id, select) //, {lean: true}
-            const populate = req.restify.populate
+            const populate = req.restify.populate            
             if(populate){
                 await ret.populate(populate).execPopulate()
             }

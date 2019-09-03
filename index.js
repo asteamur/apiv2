@@ -15,7 +15,7 @@ const router = express.Router();
 
 const querySchema = new Schema({
     a: {
-      type: String,
+      type: RegExp//String,
     }
 })
 
@@ -28,7 +28,6 @@ createApi({
     auth,
     path: '/api/a',
     Model: A,
-    populateArg = ['b'],
     querySchema,
     injection: function(method){
         return {path: 'user:memorandum:' + method}
