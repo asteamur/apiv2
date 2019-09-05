@@ -121,6 +121,23 @@ describe('suite get', ()=>{
         }), [{a: 'insert coin', c: 3}, {a: 'bingo!', c: 2}])
     })
 
+    it('test get several a, field a, c, sort -c, page 2, limit 2', async ()=>{
+        ret = await axios.get('http://localhost:3000/api/a', {
+            params: {
+                page: 2,
+                limit: 2,
+                sort: '-c',
+                fields: ['a', 'c']
+            },
+            paramsSerializer: params => {
+                return qs.stringify(params)
+            }
+        })
+        assert.deepEqual(ret.data.map((x) => {
+            return {a: x.a, c: x.c}
+        }), [{a: 'google!', c: 1}, {a: 'yahoo!', c: 0}])
+    })
+
 })
 
 describe('suite patch', ()=>{

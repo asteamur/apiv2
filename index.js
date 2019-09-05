@@ -13,11 +13,18 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 const router = express.Router();
 
-const querySchema = new Schema({
+/*const querySchema = new Schema({
     a: {
       type: RegExp//String,
     }
 })
+*/
+
+const querySchema = {
+    a: {
+        type: RegExp//String,
+      }
+}
 
 function auth(req, res, next){
     next()
