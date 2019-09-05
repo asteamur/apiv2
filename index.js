@@ -3,7 +3,8 @@ var bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 const { createApi } = require('./restify')
 const { A } = require('./model')
-const { Schema } = require('querymen')
+//const { Schema } = require('querymen')
+const { Memorandum } = require('./models/memorandum')
 
 const uri = 'mongodb://localhost:27017/test'
 
@@ -40,6 +41,34 @@ createApi({
         req.body.author = req.restify.userId
     },
     querySchema,
+    injection: function(method){
+        return {path: 'user:memorandum:' + method}
+    }
+})
+
+
+const queryMemorandumSchema = {
+    dateInit: {
+        type: Date,
+        paths: ['date'],
+        operator: '$gte'
+    },
+    dateEnd: {
+        type: Date,
+        paths: ['date'],
+        operator: '$lte'
+    }
+}
+
+createApi({
+    router,
+    auth,
+    path: '/api/memorandum',
+    Model: Memorandum,
+    preWrite: (req) => {
+        req.body.author = req.restify.userId
+    },
+    querySchema: queryMemorandumSchema,
     injection: function(method){
         return {path: 'user:memorandum:' + method}
     }
