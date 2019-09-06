@@ -5,6 +5,7 @@ const MemorandumSchema = new mongoose.Schema({
     //tea_id: { type: mongoose.ObjectId, ref: TEA },
     date: Date,
     author: String,
+    sede: String,
     createdBy: String,
     createdAt: Date,
     updatedBy: String,

@@ -42,7 +42,9 @@ function populate(req, res, next){
 }
 
 function injectionMiddleware(method, f){
-    let payload = { method, authResult: {}, userId: 'miguel' }
+    //let payload = { method, authResult: {}, userId: 'miguel' }
+    let payload = { method, userId: 'miguel' }
+    
     if(typeof f === 'function'){
         payload = {...payload, ...f(method)}
     }else{

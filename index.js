@@ -1,5 +1,6 @@
 var express = require('express')
 var bodyParser = require('body-parser')
+const jwt = require('express-jwt')
 const mongoose = require('mongoose')
 const { createApi } = require('./restify')
 const { A } = require('./model')
@@ -11,6 +12,7 @@ const uri = 'mongodb://localhost:27017/test'
 const app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use('/api/protected', jwt({secret: 'secret' /*process.env.SECRET*/, requestProperty: 'token'}))
 
 const router = express.Router();
 
@@ -28,6 +30,13 @@ const querySchema = {
 }
 
 function auth(req, res, next){
+    req.restify.authResult = {}
+    if(!req.token){
+        return next()
+    }
+    if(req.token.role === 'coordinadora'){
+        req.restify.authResult = {sede: req.token.sede}
+    }
     next()
 }
 
@@ -63,7 +72,7 @@ const queryMemorandumSchema = {
 createApi({
     router,
     auth,
-    path: '/api/memorandum',
+    path: '/api/protected/memorandum',
     Model: Memorandum,
     preWrite: (req) => {
         req.body.author = req.restify.userId
